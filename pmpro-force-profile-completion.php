@@ -10,7 +10,6 @@
  * Domain Path: /languages
  */
 
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -82,8 +81,8 @@ function pmprofpc_get_incomplete_fields( $user_id = null ) {
 
 	// No required fields, return an empty array.
 	if ( empty( $required_fields ) ) {
-		// Cache the results for 15 minutes
-		set_transient( 'pmprofpc_incomplete_fields_' . $user_id, array(), 15 * MINUTE_IN_SECONDS );
+		// Cache the results for 10 minutes
+		set_transient( 'pmprofpc_incomplete_fields_' . $user_id, array(), 10 * MINUTE_IN_SECONDS );
 		return array();
 	}
 
@@ -95,8 +94,8 @@ function pmprofpc_get_incomplete_fields( $user_id = null ) {
 		}
 	}
 
-	// Cache the results for 15 minutes
-	set_transient( 'pmprofpc_incomplete_fields_' . $user_id, $required_fields, 15 * MINUTE_IN_SECONDS );
+	// Cache the results for 10 minutes
+	set_transient( 'pmprofpc_incomplete_fields_' . $user_id, $required_fields, 10 * MINUTE_IN_SECONDS );
 
 	return $required_fields;
 }
@@ -113,6 +112,11 @@ function pmprofpc_redirect_on_incomplete() {
 	// User logged out.
 	if ( ! is_user_logged_in() ) {
 		return; 
+	}
+
+	// We're not on a post/page, just bail.
+	if ( empty( $post) ) {
+		return;
 	}
 
 	// Unset directory pages so members may still need fields completed to view them.
