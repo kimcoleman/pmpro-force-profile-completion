@@ -10,6 +10,7 @@
  * Domain Path: /languages
  */
 
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -89,7 +90,7 @@ function pmprofpc_get_incomplete_fields( $user_id = null ) {
 	// Check each required field for a value.
 	foreach ( $required_fields as $key => $field_name ) {
 		$field_value = get_user_meta( $user_id, $key, true );
-		if ( ! empty( $field_value ) ) {
+		if ( $field_value !== '' ) {
 			unset( $required_fields[ $key ] );
 		}
 	}
@@ -221,7 +222,7 @@ function pmprofpc_update_profile_error( &$errors, $update, &$user ) {
 	// Get a list of empty required fields, and cross reference with $_REQUEST to see if they were filled out during submission.
 	if ( ! empty( $incomplete_fields ) ) {
 		foreach( $incomplete_fields as $key => $field_name ) {
-			if ( empty( $_REQUEST[$field_name] ) ) {
+			if ( $_REQUEST[$field_name] == '' ) {
 				$still_missing_fields[$key] = sanitize_text_field( $field_name );
 			}
 		}
