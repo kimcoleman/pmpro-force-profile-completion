@@ -110,6 +110,11 @@ function pmprofpc_get_incomplete_fields( $user_id = null ) {
 function pmprofpc_redirect_on_incomplete() {
 	global $pmpro_pages, $post;
 
+	// PMPro isn't active, bail.
+	if ( ! defined( 'PMPRO_VERSION' ) ) {
+		return; 
+	}
+
 	// User logged out.
 	if ( ! is_user_logged_in() ) {
 		return; 
@@ -255,7 +260,7 @@ function pmprofpc_enqueue_scripts() {
 	global $pmpro_pages;
 
 	// Only enqueue this on the edit profile page.
-	if ( is_page( $pmpro_pages['member_profile_edit'] ) ) {
+	if ( ! empty( $pmpro_pages ) && is_page( $pmpro_pages['member_profile_edit'] ) ) {
 		wp_enqueue_script( 'pmprofpc-frontend', plugins_url( 'js/pmprofpc-frontend.js', __FILE__ ), array( 'jquery' ), PMPROFPC_VERSION, true );
 	}
 }
