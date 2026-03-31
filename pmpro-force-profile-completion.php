@@ -125,6 +125,11 @@ function pmprofpc_redirect_on_incomplete() {
 		return;
 	}
 
+	// Logged in and no membership level, let core handle it.
+	if ( ! pmpro_hasMembershipLevel() ) {
+		return;
+	}
+
 	// Unset directory pages so members may still need fields completed to view them.
 	unset( $pmpro_pages['directory'] );
 	unset( $pmpro_pages['profile'] );
