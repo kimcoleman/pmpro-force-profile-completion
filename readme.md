@@ -1,4 +1,4 @@
-<!-- ![](pmpro-sample-banner.png) -->
+![](pmpro-force-profile-completion-banner.png)
 
 # [Force Profile Completion](https://www.paidmembershipspro.com/add-ons/force-profile-completion) #
 [comment]: # (Generate badges from shields.io, only works for .org plugins to get other stats etc. We'd have to create our own endpoints for Premium plugins)
