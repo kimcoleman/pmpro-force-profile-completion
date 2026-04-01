@@ -1,15 +1,16 @@
 <?php
 /**
  * Plugin Name: Paid Memberships Pro - Force Profile Completion
- * Plugin URI: https://www.paidmembershipspro.com/add-ons/pmpro-force
+ * Plugin URI: https://www.paidmembershipspro.com/add-ons/force-profile-completion
  * Description: Require all members to complete required profile fields before accessing restricted content.
  * Version: 1.0
  * Author: Paid Memberships Pro
  * Author URI: https://www.paidmembershipspro.com
  * Text Domain: pmpro-force-profile-completion
  * Domain Path: /languages
+ * License: GPL-3.0+
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -53,6 +54,10 @@ function pmprofpc_is_page_restricted( $post_id ) {
  * @return array An array of incomplete required fields.
  */
 function pmprofpc_get_incomplete_fields( $user_id = null ) {
+	if ( ! defined( 'PMPRO_VERSION' ) ) {
+		return array();
+	}
+
 	global $current_user;
 	if ( empty( $user_id ) ) {
 		$user_id = $current_user->ID;
@@ -90,7 +95,7 @@ function pmprofpc_get_incomplete_fields( $user_id = null ) {
 	// Check each required field for a value.
 	foreach ( $required_fields as $key => $field_name ) {
 		$field_value = get_user_meta( $user_id, $key, true );
-		if ( trim( $field_value ) !== '' ) {
+		if ( trim( (string) $field_value ) !== '' ) {
 			unset( $required_fields[ $key ] );
 		}
 	}
@@ -112,7 +117,7 @@ function pmprofpc_redirect_on_incomplete() {
 
 	// PMPro isn't active, bail.
 	if ( ! defined( 'PMPRO_VERSION' ) ) {
-		return; 
+		return;
 	}
 
 	// User logged out.
@@ -157,13 +162,16 @@ function pmprofpc_redirect_on_incomplete() {
 }
 add_action( 'template_redirect', 'pmprofpc_redirect_on_incomplete' );
 
-
 /**
  * Shows a warning on the PMPro account page for incompleted fields.
  *
  * @since 1.0
  */
 function pmprofpc_show_warning_on_account() {
+	if ( ! defined( 'PMPRO_VERSION' ) ) {
+		return;
+	}
+
 	global $pmpro_pages, $current_user;
 
 	// Only show warning on the profile edit page.
@@ -172,7 +180,8 @@ function pmprofpc_show_warning_on_account() {
 	}
 
 	// We are submitting the profile form, so we don't need to show the warning.
-	if ( isset( $_REQUEST['action'] ) && 'update-profile' === $_REQUEST['action'] ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only checking submission context, not processing data.
+	if ( isset( $_REQUEST['action'] ) && 'update-profile' === sanitize_key( wp_unslash( $_REQUEST['action'] ) ) ) {
 		return;
 	}
 
@@ -189,8 +198,10 @@ function pmprofpc_show_warning_on_account() {
 
 	// Tweak according to number of error fields.
 	if ( count( $missing_fields_labels ) === 1 ) {
+		/* translators: %s: Name of the required field. */
 		$error_message = sprintf( esc_html__( 'The %s field is required.', 'pmpro-force-profile-completion' ), implode( ', ', $missing_fields_labels ) );
 	} else {
+		/* translators: %s: Comma-separated list of required field names. */
 		$error_message = sprintf( esc_html__( 'The %s fields are required.', 'pmpro-force-profile-completion' ), implode( ', ', $missing_fields_labels ) );
 	}
 
@@ -230,9 +241,11 @@ function pmprofpc_update_profile_error( &$errors, $update, &$user ) {
 	$still_missing_fields = array();
 	
 	// Get a list of empty required fields, and cross reference with $_REQUEST to see if they were filled out during submission.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce is verified by PMPro before calling this filter.
 	if ( ! empty( $incomplete_fields ) ) {
 		foreach( $incomplete_fields as $key => $field_name ) {
-			if ( trim( $_REQUEST[$field_name] ) == '' ) {
+			$request_value = isset( $_REQUEST[ $key ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ $key ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( trim( $request_value ) === '' ) {
 				$still_missing_fields[$key] = sanitize_text_field( $field_name );
 			}
 		}
@@ -240,14 +253,16 @@ function pmprofpc_update_profile_error( &$errors, $update, &$user ) {
 
 	// If there are still missing fields, add an error.
 	if ( ! empty( $still_missing_fields ) ) {
-		global $pmpro_error_fields;
+		global $pmpro_error_fields; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- $pmpro_error_fields is a PMPro core global.
 		$required = array_unique($still_missing_fields);
-		
-		$pmpro_error_fields = array_merge( (array) $pmpro_error_fields, array_keys( $still_missing_fields ) );
+
+		$pmpro_error_fields = array_merge( (array) $pmpro_error_fields, array_keys( $still_missing_fields ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 
 		if( count( $required ) == 1 ) {
+			/* translators: %s: Name of the required field. */
 			$errors[] = sprintf( esc_html__( 'The %s field is required.', 'pmpro-force-profile-completion' ),  implode(", ", $still_missing_fields) );
 		} else {
+			/* translators: %s: Comma-separated list of required field names. */
 			$errors[] = sprintf( esc_html__( 'The %s fields are required.', 'pmpro-force-profile-completion' ),  implode(", ", $still_missing_fields) );
 		}
 	}
@@ -271,12 +286,16 @@ function pmprofpc_enqueue_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'pmprofpc_enqueue_scripts' );
 
-/** 
+/**
  * Show the required indicators in the frontend profile page and unhook the default function.
  * 
  * @since 1.0
  */
 function pmprofpc_show_user_fields_in_frontend_profile_with_locations( $user ) {
+	if ( ! defined( 'PMPRO_VERSION' ) ) {
+		return;
+	}
+
 	$groups = PMPro_Field_Group::get_all();
 	foreach( $groups as $group ) {
 		$group->display(
@@ -287,10 +306,10 @@ function pmprofpc_show_user_fields_in_frontend_profile_with_locations( $user ) {
 				'show_required' => true
 			)
 		);
-	}	
+	}
 }
-add_action( 'pmpro_show_user_profile', 'pmprofpc_show_user_fields_in_frontend_profile_with_locations' );
 remove_action( 'pmpro_show_user_profile', 'pmpro_show_user_fields_in_frontend_profile_with_locations' );
+add_action( 'pmpro_show_user_profile', 'pmprofpc_show_user_fields_in_frontend_profile_with_locations' );
 
 /**
  * Redirect on login if there are incomplete required fields.
@@ -301,7 +320,10 @@ remove_action( 'pmpro_show_user_profile', 'pmpro_show_user_fields_in_frontend_pr
  * @param WP_User  $user       The WP_User object of the logged-in user.
  */
 function pmprofpc_redirect_on_login( $user_login, $user ) {
-	
+	if ( ! defined( 'PMPRO_VERSION' ) ) {
+		return;
+	}
+
 	// Let's make sure we're not logging in at PMPro checkout.
 	if ( pmpro_is_checkout() ) {
 		return;
@@ -325,7 +347,7 @@ add_action( 'wp_login', 'pmprofpc_redirect_on_login', 10, 2 );
  * Clear the cache when the person's profile is updated.
  *
  * @since 1.0
- * 
+ *
  * @param int $user_id The WordPress user ID.
  */
 function pmprofpc_clear_incomplete_fields_cache( $user_id ) {
@@ -333,3 +355,17 @@ function pmprofpc_clear_incomplete_fields_cache( $user_id ) {
 }
 add_action( 'pmpro_personal_options_update', 'pmprofpc_clear_incomplete_fields_cache' );
 add_action( 'profile_update', 'pmprofpc_clear_incomplete_fields_cache' );
+
+/**
+ * Clear the cache for all users when User Fields settings are saved in the admin.
+ * This is necessary when field names change, as the transient is keyed by field name.
+ *
+ * @since 1.0
+ */
+function pmprofpc_clear_all_incomplete_fields_cache() {
+	global $wpdb;
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_pmprofpc_incomplete_fields_%' OR option_name LIKE '_transient_timeout_pmprofpc_incomplete_fields_%'" );
+}
+add_action( 'update_option_pmpro_user_fields_settings', 'pmprofpc_clear_all_incomplete_fields_cache' );
+add_action( 'add_option_pmpro_user_fields_settings', 'pmprofpc_clear_all_incomplete_fields_cache' );
+add_action( 'delete_option_pmpro_user_fields_settings', 'pmprofpc_clear_all_incomplete_fields_cache' );
