@@ -1,5 +1,5 @@
 # Copyright (C) 2026 Paid Memberships Pro
-# This file is distributed under the same license as the Paid Memberships Pro - Force Profile Completion plugin.
+# This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
 "Project-Id-Version: Paid Memberships Pro - Force Profile Completion 1.0\n"
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-19T09:55:17+00:00\n"
+"POT-Creation-Date: 2026-04-01T09:39:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pmpro-force-profile-completion\n"
@@ -39,14 +39,25 @@ msgstr ""
 msgid "https://www.paidmembershipspro.com"
 msgstr ""
 
+#. translators: %s: Name of the required field.
 #: pmpro-force-profile-completion.php:177
 #: pmpro-force-profile-completion.php:234
+#: pmpro-force-profile-completion.php:202
+#: pmpro-force-profile-completion.php:263
 #, php-format
 msgid "The %s field is required."
 msgstr ""
 
+#. translators: %s: Comma-separated list of required field names.
 #: pmpro-force-profile-completion.php:179
 #: pmpro-force-profile-completion.php:236
+#: pmpro-force-profile-completion.php:205
+#: pmpro-force-profile-completion.php:266
 #, php-format
 msgid "The %s fields are required."
+msgstr ""
+
+#. Plugin URI of the plugin
+#: pmpro-force-profile-completion.php
+msgid "https://www.paidmembershipspro.com/add-ons/force-profile-completion"
 msgstr ""
