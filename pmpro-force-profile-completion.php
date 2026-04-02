@@ -76,27 +76,56 @@ function pmprofpc_get_incomplete_fields( $user_id = null ) {
 	}
 
 	// Loop through all fields_for_member and flatten the array.
-	$required_fields = array();
+	// Store field objects so we can check 'depends' conditions later.
+	$required_field_objects = array();
 	foreach( $fields_for_member as $field ) {
-		array_filter( $field, function( $required_field ) use ( &$required_fields ) {
+		array_filter( $field, function( $required_field ) use ( &$required_field_objects ) {
 			if ( $required_field->required ) {
-				$required_fields[$required_field->name] = $required_field->label;
+				$required_field_objects[ $required_field->name ] = $required_field;
 			}
 		} );
 	}
 
 	// No required fields, return an empty array.
-	if ( empty( $required_fields ) ) {
+	if ( empty( $required_field_objects ) ) {
 		// Cache the results for 10 minutes
 		set_transient( 'pmprofpc_incomplete_fields_' . $user_id, array(), 10 * MINUTE_IN_SECONDS );
 		return array();
 	}
 
-	// Check each required field for a value.
-	foreach ( $required_fields as $key => $field_name ) {
+	// Check each required field for a value, skipping fields whose 'depends' condition is not met.
+	$required_fields = array();
+	foreach ( $required_field_objects as $key => $field_obj ) {
+		// If the field has a 'depends' condition, check it against the user's stored meta.
+		// If the condition is not satisfied the field is hidden, so it is not actually required.
+		if ( ! empty( $field_obj->depends ) ) {
+			$depends_met = true;
+			foreach ( $field_obj->depends as $check ) {
+				if ( empty( $check['id'] ) || ! isset( $check['value'] ) ) {
+					continue;
+				}
+				$parent_value = get_user_meta( $user_id, $check['id'], true );
+				if ( is_array( $parent_value ) ) {
+					if ( ! in_array( $check['value'], $parent_value ) ) {
+						$depends_met = false;
+						break;
+					}
+				} else {
+					if ( (string) $parent_value !== (string) $check['value'] ) {
+						$depends_met = false;
+						break;
+					}
+				}
+			}
+			if ( ! $depends_met ) {
+				// Parent condition not met — field is hidden, skip it.
+				continue;
+			}
+		}
+
 		$field_value = get_user_meta( $user_id, $key, true );
-		if ( trim( (string) $field_value ) !== '' ) {
-			unset( $required_fields[ $key ] );
+		if ( trim( (string) $field_value ) === '' ) {
+			$required_fields[ $key ] = $field_obj->label;
 		}
 	}
 
