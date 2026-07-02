@@ -164,13 +164,14 @@ function pmprofpc_redirect_on_incomplete() {
 		return;
 	}
 
-	// Unset directory pages so members may still need fields completed to view them.
-	unset( $pmpro_pages['directory'] );
-	unset( $pmpro_pages['profile'] );
+	// Unset directory pages (on a local copy) so members may still need fields completed to view them.
+	$pmpro_pages_to_check = $pmpro_pages;
+	unset( $pmpro_pages_to_check['directory'] );
+	unset( $pmpro_pages_to_check['profile'] );
 
 	// Don't redirect away from any PMPro assigned page.
-	if ( is_page( $pmpro_pages ) ) {
-		return; 
+	if ( is_page( $pmpro_pages_to_check ) ) {
+		return;
 	}
 
 	// Page is a public page, no check needed.
