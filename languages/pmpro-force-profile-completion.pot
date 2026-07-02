@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Paid Memberships Pro - Force Profile Completion 1.0\n"
+"Project-Id-Version: Paid Memberships Pro - Force Profile Completion 1.1\n"
 "Report-Msgid-Bugs-To: info@paidmembershipspro.com\n"
 "Last-Translator: Paid Memberships Pro <info@paidmembershipspro.com>\n"
 "Language-Team: Paid Memberships Pro <info@paidmembershipspro.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-01T20:23:51+00:00\n"
+"POT-Creation-Date: 2026-07-02T08:48:36+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: pmpro-force-profile-completion\n"
@@ -40,15 +40,15 @@ msgid "https://www.paidmembershipspro.com"
 msgstr ""
 
 #. translators: %s: Name of the required field.
-#: pmpro-force-profile-completion.php:202
-#: pmpro-force-profile-completion.php:263
+#: pmpro-force-profile-completion.php:232
+#: pmpro-force-profile-completion.php:293
 #, php-format
 msgid "The %s field is required."
 msgstr ""
 
 #. translators: %s: Comma-separated list of required field names.
-#: pmpro-force-profile-completion.php:205
-#: pmpro-force-profile-completion.php:266
+#: pmpro-force-profile-completion.php:235
+#: pmpro-force-profile-completion.php:296
 #, php-format
 msgid "The %s fields are required."
 msgstr ""
